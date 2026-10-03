@@ -2,6 +2,7 @@
 
 import React, { useRef } from "react";
 import { useState, useCallback } from "react";
+import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { TemplateFileTree } from "@/features/playground/components/playground-explorer";
@@ -15,6 +16,7 @@ import {
   Save,
   X,
   Settings,
+  Home,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -109,8 +111,6 @@ const MainPlaygroundPage: React.FC = () => {
   // Initialize zustand templateData from usePlayground only on first load
   React.useEffect(() => {
     if (templateData && !openFiles.length) {
-
-      
       setTemplateData(templateData);
     }
   }, [templateData, setTemplateData, openFiles.length]);
@@ -211,7 +211,9 @@ const MainPlaygroundPage: React.FC = () => {
         const updatedTemplateData = JSON.parse(
           JSON.stringify(latestTemplateData)
         );
-        const updateFileContent = (items: (TemplateFile | TemplateFolder)[]): (TemplateFile | TemplateFolder)[] =>
+        const updateFileContent = (
+          items: (TemplateFile | TemplateFolder)[]
+        ): (TemplateFile | TemplateFolder)[] =>
           items.map((item) => {
             if ("folderName" in item) {
               return { ...item, items: updateFileContent(item.items) };
@@ -381,6 +383,18 @@ const MainPlaygroundPage: React.FC = () => {
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
 
+            {/* Home button */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button asChild size="sm" variant="outline">
+                  <Link href="/dashboard">
+                    <Home className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Back to Home</TooltipContent>
+            </Tooltip>
+
             <div className="flex flex-1 items-center gap-2">
               <div className="flex flex-col flex-1">
                 <h1 className="text-sm font-medium">
@@ -425,7 +439,15 @@ const MainPlaygroundPage: React.FC = () => {
                   isEnabled={aiSuggestions.isEnabled}
                   onToggle={aiSuggestions.toggleEnabled}
                   suggestionLoading={aiSuggestions.isLoading}
-                  activeFileName={activeFile ? `${activeFile.filename}${activeFile.fileExtension ? `.${activeFile.fileExtension}` : ""}` : undefined}
+                  activeFileName={
+                    activeFile
+                      ? `${activeFile.filename}${
+                          activeFile.fileExtension
+                            ? `.${activeFile.fileExtension}`
+                            : ""
+                        }`
+                      : undefined
+                  }
                   activeFileContent={activeFile?.content}
                   activeFileLanguage={activeFile?.fileExtension || undefined}
                 />
@@ -566,14 +588,16 @@ const MainPlaygroundPage: React.FC = () => {
           </div>
         </SidebarInset>
 
-      <ConfirmationDialog
-      isOpen={confirmationDialog.isOpen}
-      title={confirmationDialog.title}
-      description={confirmationDialog.description}
-      onConfirm={confirmationDialog.onConfirm}
-      onCancel={confirmationDialog.onCancel}
-      setIsOpen={(open) => setConfirmationDialog((prev) => ({ ...prev, isOpen: open }))}
-      />
+        <ConfirmationDialog
+          isOpen={confirmationDialog.isOpen}
+          title={confirmationDialog.title}
+          description={confirmationDialog.description}
+          onConfirm={confirmationDialog.onConfirm}
+          onCancel={confirmationDialog.onCancel}
+          setIsOpen={(open) =>
+            setConfirmationDialog((prev) => ({ ...prev, isOpen: open }))
+          }
+        />
       </>
     </TooltipProvider>
   );

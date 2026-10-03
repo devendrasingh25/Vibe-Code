@@ -13,7 +13,7 @@ import {
 
 export const metadata: Metadata = {
   title: "Docs - Getting Started | VibeCode",
-  description: "Learn how to create playgrounds, import GitHub repos, and use the VibeCode editor.",
+  description: "Learn how to create playgrounds, import GitHub repos, and use the VibeCode .",
 };
 
 const steps = [
@@ -60,7 +60,7 @@ export default function DocsPage() {
           Getting Started
         </h1>
         <p className="text-lg text-gray-600 dark:text-gray-400 mb-10">
-          VibeCode Editor lets you spin up a real, runnable dev environment in
+          Vibe Code  lets you spin up a real, runnable dev environment in
           your browser — from a starter template or straight from a GitHub repo.
           Here&apos;s everything you need to know.
         </p>
