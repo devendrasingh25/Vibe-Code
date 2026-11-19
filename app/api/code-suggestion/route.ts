@@ -1,8 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import Groq from "groq-sdk"
 import { auth } from "@/auth"
-
-const client = new Groq({ apiKey: process.env.GROQ_API_KEY! })
 
 const MAX_FILE_CHARS = 200_000
 
@@ -144,26 +141,38 @@ Provide only the code to insert at |CURSOR|, matching the surrounding indentatio
  * Generate suggestion using Groq. Throws on failure so the caller can return an error status.
  */
 async function generateSuggestion(prompt: string): Promise<string> {
-  const completion = await client.chat.completions.create({
-    model: "openai/gpt-oss-20b",
-    messages: [
-      {
-        role: "system",
-        content: `You are an expert code completion assistant.
+  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: "openai/gpt-oss-20b",
+      messages: [
+        {
+          role: "system",
+          content: `You are an expert code completion assistant.
 
 Return ONLY the code that should be inserted.
 Do not explain anything.
 Do not wrap your answer in markdown.
 Preserve indentation.
 Keep the completion concise.`,
-      },
-      { role: "user", content: prompt },
-    ],
-    temperature: 0.3,
-    max_tokens: 600, // headroom: reasoning tokens count toward this limit
+        },
+        { role: "user", content: prompt },
+      ],
+      temperature: 0.3,
+      max_tokens: 600, // headroom: reasoning tokens count toward this limit
+    }),
   })
 
-  let suggestion = completion.choices[0]?.message?.content?.trim() ?? ""
+  if (!res.ok) {
+    throw new Error(`Groq error ${res.status}: ${await res.text()}`)
+  }
+
+  const data = await res.json()
+  let suggestion: string = data.choices?.[0]?.message?.content?.trim() ?? ""
 
   // Strip markdown fences and the cursor marker if the model echoes them
   suggestion = suggestion.replace(/```[\w]*\n?/g, "").replace(/\|CURSOR\|/g, "").trim()
